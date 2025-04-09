@@ -17,7 +17,6 @@ const io = new Server(server, {
   }
 });
 
-
 let waitingUser = null;
 
 io.on("connection", (socket) => {
