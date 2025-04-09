@@ -1,4 +1,4 @@
-const socket = io('https://chat-app-eeiv.onrender.com');
+const socket = io("https://chat-app-eeiv.onrender.com");
 
 socket.on('connect', () => {
   console.log('Connected to server with id:', socket.id);
