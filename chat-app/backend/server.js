@@ -57,6 +57,10 @@ io.on("connection", (socket) => {
         }
     });
 
+    socket.on("reaction", (emoji) => {
+        console.log(`User ${socket.id} reacted with ${emoji}`);
+    });
+
 });
 
 function match(socket) {
