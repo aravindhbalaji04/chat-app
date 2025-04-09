@@ -2,6 +2,9 @@ body {
     font-family: Arial;
     text-align: center;
     margin: 50px;
+    background-color: #ffffff;
+    color: #000000;
+    transition: background 0.3s, color 0.3s;
 }
 
 #messages {
@@ -12,8 +15,33 @@ body {
     width: 300px;
     padding: 10px;
     text-align: left;
+    background-color: #f9f9f9;
 }
 
 input {
     width: 200px;
+}
+
+/* 🌙 Dark Theme Styles */
+body.dark {
+    background-color: #121212;
+    color: #ffffff;
+}
+
+body.dark #messages {
+    background-color: #1e1e1e;
+    border-color: #444;
+}
+
+/* 🌗 Toggle Styling */
+.theme-toggle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+.theme-toggle input {
+    transform: scale(1.2);
 }
