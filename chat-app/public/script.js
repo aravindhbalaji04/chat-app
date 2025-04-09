@@ -107,6 +107,20 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+// Send emoji when clicked
+document.querySelectorAll('.emoji').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const emoji = btn.textContent;
+        socket.emit("reaction", emoji);
+        addMessage(`You reacted: ${emoji}`);
+    });
+});
+
+// Receive emoji reaction
+socket.on("reaction", (emoji) => {
+    addMessage(`Stranger reacted: ${emoji}`);
+});
+
 // ===== Typing Indicator Logic =====
 let typingTimeout;
 
