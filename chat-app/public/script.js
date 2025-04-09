@@ -1,5 +1,11 @@
 const socket = io("https://chat-app-eeiv.onrender.com");
 
+window.addEventListener("click", () => {
+    soundMessage.play().catch(() => {});
+    soundConnect.play().catch(() => {});
+    soundDisconnect.play().catch(() => {});
+}, { once: true });
+
 // 🔊 Sound elements
 const soundMessage = document.getElementById("sound-message");
 const soundConnect = document.getElementById("sound-connect");
