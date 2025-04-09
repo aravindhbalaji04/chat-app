@@ -54,3 +54,20 @@ body.dark #messages {
 .theme-toggle input {
     transform: scale(1.2);
 }
+
+#emoji-row {
+    margin-top: 10px;
+}
+
+.emoji {
+    font-size: 20px;
+    padding: 5px 10px;
+    margin: 2px;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+body.dark .emoji {
+    color: #fff;
+}
