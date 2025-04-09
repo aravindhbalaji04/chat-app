@@ -1,46 +1,5 @@
 const socket = io("https://chat-app-eeiv.onrender.com");
 
-window.addEventListener("click", () => {
-    soundMessage.play().catch(() => {});
-    soundConnect.play().catch(() => {});
-    soundDisconnect.play().catch(() => {});
-}, { once: true });
-
-// 🔊 Sound elements
-const soundMessage = document.getElementById("sound-message");
-const soundConnect = document.getElementById("sound-connect");
-const soundDisconnect = document.getElementById("sound-disconnect");
-
-function playSound(sound) {
-    sound.currentTime = 0;
-    sound.play().catch((e) => {
-        // Some browsers block auto-play unless user interacted
-        console.warn("Sound blocked until user interaction:", e);
-    });
-}
-
-socket.on("message", (msg) => {
-    addMessage(`Stranger: ${msg}`);
-    playSound(soundMessage);
-});
-
-socket.on("paired", () => {
-    status.style.display = "none";
-    chat.style.display = "block";
-    messages.innerHTML = "";
-    hideTypingIndicator();
-    playSound(soundConnect);
-});
-
-socket.on("partner-left", () => {
-    addMessage("❌ Stranger left the chat.");
-    status.textContent = "Partner disconnected.";
-    status.style.display = "block";
-    chat.style.display = "none";
-    hideTypingIndicator();
-    playSound(soundDisconnect);
-});
-
 socket.on('connect', () => {
   console.log('Connected to server with id:', socket.id);
 });
@@ -101,7 +60,6 @@ socket.on("stopTyping", () => {
 });
 
 function sendMessage() {
-    playSound(soundMessage); // <-- test if this plays when you send
     const msg = input.value;
     if (msg.trim()) {
         addMessage(`You: ${msg}`);
