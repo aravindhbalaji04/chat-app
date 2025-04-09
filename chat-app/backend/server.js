@@ -50,7 +50,13 @@ io.on("connection", (socket) => {
             socket.partner.emit("stopTyping");
         }
     });
-  
+
+    socket.on("reaction", (emoji) => {
+        if (socket.partner) {
+            io.to(socket.partner).emit("reaction", emoji);
+        }
+    });
+
 });
 
 function match(socket) {
