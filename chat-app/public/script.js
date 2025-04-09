@@ -101,6 +101,7 @@ socket.on("stopTyping", () => {
 });
 
 function sendMessage() {
+    playSound(soundMessage); // <-- test if this plays when you send
     const msg = input.value;
     if (msg.trim()) {
         addMessage(`You: ${msg}`);
