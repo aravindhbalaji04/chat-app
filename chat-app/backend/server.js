@@ -6,10 +6,19 @@ const cors = require("cors");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
 
-app.use(cors());
+// Replace with your actual Netlify frontend URL
+const FRONTEND_ORIGIN = "https://your-netlify-site.netlify.app";
+
+app.use(cors({ origin: FRONTEND_ORIGIN }));
 app.use(express.static(path.join(__dirname, "../public")));
+
+const io = new Server(server, {
+  cors: {
+    origin: FRONTEND_ORIGIN,
+    methods: ["GET", "POST"]
+  }
+});
 
 let waitingUser = null;
 
