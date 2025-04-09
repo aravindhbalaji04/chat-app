@@ -10,7 +10,7 @@ const server = http.createServer(app);
 // 🔥 IMPORTANT: Add your actual Netlify URL
 const io = new Server(server, {
   cors: {
-    origin: "https://anonymous-chat-cit.netlify.app",
+    origin: "https://anonymous-rant.netlify.app",
     methods: ["GET", "POST"]
   }
 });
