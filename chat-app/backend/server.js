@@ -53,7 +53,7 @@ io.on("connection", (socket) => {
 
     socket.on("reaction", (emoji) => {
         if (socket.partner) {
-            io.to(socket.partner).emit("reaction", emoji);
+            socket.partner.emit("reaction", emoji);
         }
     });
 
