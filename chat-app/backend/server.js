@@ -7,15 +7,16 @@ const cors = require("cors");
 const app = express();
 const server = http.createServer(app);
 
-// Replace with your actual Netlify frontend URL
-const FRONTEND_ORIGIN = "https://anonymous-chat-cit.netlify.app/";
-
+// 🔥 IMPORTANT: Add your actual Netlify URL
 const io = new Server(server, {
   cors: {
-    origin: FRONTEND_ORIGIN,
+    origin: "https://anonymous-chat-cit.netlify.app",
     methods: ["GET", "POST"]
   }
 });
+
+app.use(cors());
+app.use(express.static(path.join(__dirname, "../public")));
 
 let waitingUser = null;
 
