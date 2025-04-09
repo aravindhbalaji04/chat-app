@@ -1,4 +1,4 @@
-const socket = io("https://chat-app-eeiv.onrender.com");
+const socket = io('https://chat-app-eeiv.onrender.com');
 
 const status = document.getElementById("status");
 const chat = document.getElementById("chat");
