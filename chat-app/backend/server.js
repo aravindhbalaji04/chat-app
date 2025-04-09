@@ -7,9 +7,6 @@ const cors = require("cors");
 const app = express();
 const server = http.createServer(app);
 
-app.use(express.static(path.join(__dirname, "../public")));
-app.use("/sounds", express.static(path.join(__dirname, "../public/sounds")));
-
 // 🔥 IMPORTANT: Add your actual Netlify URL
 const io = new Server(server, {
   cors: {
