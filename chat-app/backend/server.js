@@ -8,7 +8,7 @@ const app = express();
 const server = http.createServer(app);
 
 // Replace with your actual Netlify frontend URL
-const FRONTEND_ORIGIN = "https://your-netlify-site.netlify.app";
+const FRONTEND_ORIGIN = "https://anonymous-chat-cit.netlify.app";
 
 app.use(cors({ origin: FRONTEND_ORIGIN }));
 app.use(express.static(path.join(__dirname, "../public")));
