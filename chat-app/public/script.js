@@ -98,12 +98,22 @@ themeToggle.addEventListener("change", () => {
     localStorage.setItem("theme", themeToggle.checked ? "dark" : "light");
 });
 
-// Remember theme on load
+// 🌗 Auto-detect and remember theme
 window.addEventListener("DOMContentLoaded", () => {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme === "dark") {
         document.body.classList.add("dark");
         themeToggle.checked = true;
+    } else if (savedTheme === "light") {
+        document.body.classList.remove("dark");
+        themeToggle.checked = false;
+    } else {
+        // Auto-detect system preference on first visit
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (prefersDark) {
+            document.body.classList.add("dark");
+            themeToggle.checked = true;
+        }
     }
 });
 
