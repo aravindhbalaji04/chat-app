@@ -14,8 +14,6 @@ const messages = document.getElementById("messages");
 const input = document.getElementById("input");
 const send = document.getElementById("send");
 const next = document.getElementById("next");
-const input = document.getElementById("messageInput");
-const sendBtn = document.getElementById("sendBtn");
 
 send.onclick = sendMessage;
 next.onclick = () => {
@@ -47,26 +45,6 @@ socket.on("partner-left", () => {
     chat.style.display = "none";
 });
 
-// Send message on Enter, newline on Shift+Enter
-input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-        if (e.shiftKey) {
-            // Insert newline
-            const cursorPos = input.selectionStart;
-            input.value = input.value.slice(0, cursorPos) + "\n" + input.value.slice(cursorPos);
-            input.selectionStart = input.selectionEnd = cursorPos + 1;
-            e.preventDefault(); // Prevent sending
-        } else {
-            // Send message
-            e.preventDefault(); // Prevent newline
-            sendMessage();
-        }
-    }
-});
-
-// Send message function (already works on button)
-sendBtn.addEventListener("click", sendMessage);
-
 function sendMessage() {
     const msg = input.value;
     if (msg.trim()) {
@@ -82,3 +60,11 @@ function addMessage(msg) {
     messages.appendChild(div);
     messages.scrollTop = messages.scrollHeight;
 }
+
+// ✅ Add Enter and Shift+Enter support
+input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault(); // Prevent newline
+        sendMessage();
+    }
+});
