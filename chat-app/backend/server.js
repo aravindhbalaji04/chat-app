@@ -3,6 +3,8 @@ const http = require("http");
 const { Server } = require("socket.io");
 const path = require("path");
 const cors = require("cors");
+const input = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
 
 const app = express();
 const server = http.createServer(app);
@@ -60,6 +62,34 @@ function disconnectPartner(socket) {
         socket.partner.emit("partner-left");
         socket.partner.partner = null;
         socket.partner = null;
+    }
+}
+
+input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        if (e.shiftKey) {
+            // Insert newline
+            const cursorPos = input.selectionStart;
+            input.value = input.value.slice(0, cursorPos) + "\n" + input.value.slice(cursorPos);
+            input.selectionStart = input.selectionEnd = cursorPos + 1;
+            e.preventDefault(); // Prevent sending
+        } else {
+            // Send message
+            e.preventDefault(); // Prevent newline
+            sendMessage();
+        }
+    }
+});
+
+// Send message function (already works on button)
+sendBtn.addEventListener("click", sendMessage);
+
+function sendMessage() {
+    const msg = input.value.trim();
+    if (msg) {
+        appendMessage("You", msg);
+        socket.emit("message", msg);
+        input.value = "";
     }
 }
 
