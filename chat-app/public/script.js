@@ -68,3 +68,10 @@ input.addEventListener("keydown", (e) => {
         sendMessage();
     }
 });
+
+// ⏩ ESC key to skip to next chat
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+        next.click(); // Trigger next button
+    }
+});
