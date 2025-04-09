@@ -22,6 +22,15 @@ input {
     width: 200px;
 }
 
+/* Typing indicator styling */
+#typing-indicator {
+    font-style: italic;
+    color: #888;
+    margin: 5px auto;
+    width: 300px;
+    text-align: left;
+}
+
 /* 🌙 Dark Theme Styles */
 body.dark {
     background-color: #121212;
