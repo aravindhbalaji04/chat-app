@@ -1,5 +1,13 @@
 const socket = io('https://chat-app-eeiv.onrender.com');
 
+socket.on('connect', () => {
+  console.log('Connected to server with id:', socket.id);
+});
+
+socket.on('connect_error', (err) => {
+  console.error('Connection error:', err);
+});
+
 const status = document.getElementById("status");
 const chat = document.getElementById("chat");
 const messages = document.getElementById("messages");
