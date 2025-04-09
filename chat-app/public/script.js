@@ -15,6 +15,7 @@ const input = document.getElementById("input");
 const send = document.getElementById("send");
 const next = document.getElementById("next");
 const themeToggle = document.getElementById("theme-toggle");
+const typingIndicator = document.getElementById("typing-indicator");
 
 send.onclick = sendMessage;
 next.onclick = () => {
@@ -27,12 +28,14 @@ socket.on("waiting", () => {
     status.style.display = "block";
     chat.style.display = "none";
     messages.innerHTML = "";
+    hideTypingIndicator();
 });
 
 socket.on("paired", () => {
     status.style.display = "none";
     chat.style.display = "block";
     messages.innerHTML = "";
+    hideTypingIndicator();
 });
 
 socket.on("message", (msg) => {
@@ -44,6 +47,16 @@ socket.on("partner-left", () => {
     status.textContent = "Partner disconnected.";
     status.style.display = "block";
     chat.style.display = "none";
+    hideTypingIndicator();
+});
+
+// Listen for typing events from the partner
+socket.on("typing", () => {
+    showTypingIndicator();
+});
+
+socket.on("stopTyping", () => {
+    hideTypingIndicator();
 });
 
 function sendMessage() {
@@ -52,6 +65,8 @@ function sendMessage() {
         addMessage(`You: ${msg}`);
         socket.emit("message", msg);
         input.value = "";
+        // Stop typing indicator when message is sent
+        socket.emit("stopTyping");
     }
 }
 
@@ -62,7 +77,7 @@ function addMessage(msg) {
     messages.scrollTop = messages.scrollHeight;
 }
 
-// ✅ Enter and Shift+Enter
+// Enter and Shift+Enter support
 input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
@@ -70,20 +85,20 @@ input.addEventListener("keydown", (e) => {
     }
 });
 
-// ⏩ ESC to skip chat
+// ESC key to skip chat
 document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
         next.click();
     }
 });
 
-// 🌗 Theme Toggle
+// Handle theme toggle
 themeToggle.addEventListener("change", () => {
     document.body.classList.toggle("dark", themeToggle.checked);
     localStorage.setItem("theme", themeToggle.checked ? "dark" : "light");
 });
 
-// 🧠 Remember theme
+// Remember theme on load
 window.addEventListener("DOMContentLoaded", () => {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme === "dark") {
@@ -91,3 +106,27 @@ window.addEventListener("DOMContentLoaded", () => {
         themeToggle.checked = true;
     }
 });
+
+// ===== Typing Indicator Logic =====
+let typingTimeout;
+
+// Emit "typing" event while the user is typing
+input.addEventListener("input", () => {
+    socket.emit("typing");
+
+    // Clear the previous timeout if any
+    clearTimeout(typingTimeout);
+
+    // Emit "stopTyping" after 1 second of inactivity
+    typingTimeout = setTimeout(() => {
+        socket.emit("stopTyping");
+    }, 1000);
+});
+
+function showTypingIndicator() {
+    typingIndicator.style.display = "block";
+}
+
+function hideTypingIndicator() {
+    typingIndicator.style.display = "none";
+}
