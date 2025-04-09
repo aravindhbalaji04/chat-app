@@ -38,6 +38,19 @@ io.on("connection", (socket) => {
         disconnectPartner(socket);
         if (waitingUser === socket) waitingUser = null;
     });
+
+    socket.on("typing", () => {
+        if (socket.partner) {
+            socket.partner.emit("typing");
+        }
+    });
+    
+    socket.on("stopTyping", () => {
+        if (socket.partner) {
+            socket.partner.emit("stopTyping");
+        }
+    });
+  
 });
 
 function match(socket) {
