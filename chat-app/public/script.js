@@ -14,6 +14,7 @@ const messages = document.getElementById("messages");
 const input = document.getElementById("input");
 const send = document.getElementById("send");
 const next = document.getElementById("next");
+const themeToggle = document.getElementById("theme-toggle");
 
 send.onclick = sendMessage;
 next.onclick = () => {
@@ -61,17 +62,32 @@ function addMessage(msg) {
     messages.scrollTop = messages.scrollHeight;
 }
 
-// ✅ Add Enter and Shift+Enter support
+// ✅ Enter and Shift+Enter
 input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault(); // Prevent newline
+        e.preventDefault();
         sendMessage();
     }
 });
 
-// ⏩ ESC key to skip to next chat
+// ⏩ ESC to skip chat
 document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-        next.click(); // Trigger next button
+        next.click();
+    }
+});
+
+// 🌗 Theme Toggle
+themeToggle.addEventListener("change", () => {
+    document.body.classList.toggle("dark", themeToggle.checked);
+    localStorage.setItem("theme", themeToggle.checked ? "dark" : "light");
+});
+
+// 🧠 Remember theme
+window.addEventListener("DOMContentLoaded", () => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+        document.body.classList.add("dark");
+        themeToggle.checked = true;
     }
 });
