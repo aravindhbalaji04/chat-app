@@ -1,0 +1,19 @@
+body {
+    font-family: Arial;
+    text-align: center;
+    margin: 50px;
+}
+
+#messages {
+    height: 200px;
+    border: 1px solid #ccc;
+    overflow-y: scroll;
+    margin: 20px auto;
+    width: 300px;
+    padding: 10px;
+    text-align: left;
+}
+
+input {
+    width: 200px;
+}
