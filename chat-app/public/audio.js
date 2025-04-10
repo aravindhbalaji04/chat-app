@@ -60,11 +60,16 @@
     console.log("Answer set successfully");
   });
 
+  let remoteCandidatesBuffer = [];
   socket.on("ice-candidate", async (candidate) => {
-    try {
-      await peerConnection.addIceCandidate(candidate);
-    } catch (err) {
-      console.error("Error adding received ice candidate", err);
+    if (peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
+      try {
+        await peerConnection.addIceCandidate(candidate);
+      } catch (err) {
+        console.error("Error adding received ice candidate", err);
+      }
+    } else {
+      remoteCandidatesBuffer.push(candidate);
     }
   });
 })();
