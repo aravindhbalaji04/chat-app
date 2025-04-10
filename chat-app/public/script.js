@@ -46,8 +46,10 @@ socket.on("paired", async () => {
     messages.innerHTML = "";
     hideTypingIndicator();
 
-    isOfferer = true;
-    await startAudio(); // offerer starts first
+    // Let only one peer (the one with the lower socket ID) initiate audio
+    if (socket.id < yourPartnerSocketId) {
+        await startAudio();  // only the one with lower id sends offer
+    }
 });
 
 socket.on("message", (msg) => {
