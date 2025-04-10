@@ -46,9 +46,9 @@ socket.on("paired", async () => {
     messages.innerHTML = "";
     hideTypingIndicator();
 
-    await startAudio();
+    isOfferer = true;
+    await startAudio(); // offerer starts first
 });
-
 
 socket.on("message", (msg) => {
     addMessage(`Stranger: ${msg}`);
