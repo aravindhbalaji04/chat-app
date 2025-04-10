@@ -219,38 +219,19 @@ function hideTypingIndicator() {
 
 async function startAudio() {
     try {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        peerConnection = new RTCPeerConnection(config);
+        if (!localStream) {
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        }
 
-        // Add local audio stream to the connection
-        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        if (!peerConnection) {
+            await preparePeerConnection();
+        }
 
-        // Handle ICE candidates
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                socket.emit("ice-candidate", event.candidate);
-            }
-        };
-
-        // Handle incoming audio stream
-        peerConnection.ontrack = (event) => {
-            const remoteAudio = document.getElementById("remoteAudio");
-            if (remoteAudio) {
-                remoteAudio.srcObject = event.streams[0];
-            } else {
-                const audioEl = document.createElement("audio");
-                audioEl.id = "remoteAudio";
-                audioEl.autoplay = true;
-                audioEl.srcObject = event.streams[0];
-                document.body.appendChild(audioEl);
-            }
-        };
-
-        // If you're the one initiating the offer (just for demo, can improve logic)
-        const offer = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offer);
-        socket.emit("audio-offer", offer);
-
+        if (isOfferer) {
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            socket.emit("audio-offer", offer);
+        }
     } catch (err) {
         console.error("Audio error:", err);
         alert("Could not access microphone.");
