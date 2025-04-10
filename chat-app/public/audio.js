@@ -57,7 +57,15 @@
 
   socket.on("answer", async (answer) => {
     await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-    console.log("Answer set successfully");
+    console.log("Answer set. Adding buffered candidates...");
+    for (const candidate of remoteCandidatesBuffer) {
+      try {
+        await peerConnection.addIceCandidate(candidate);
+      } catch (err) {
+        console.error("Error adding buffered candidate", err);
+      }
+    }
+    remoteCandidatesBuffer = [];
   });
 
   let remoteCandidatesBuffer = [];
