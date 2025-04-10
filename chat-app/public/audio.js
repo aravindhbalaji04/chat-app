@@ -1,123 +1,70 @@
-// audio.js
+(() => {
+  let localStream;
+  let peerConnection;
+  const config = {
+    iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+  };
 
-const toggleAudioBtn = document.getElementById("toggle-audio");
-let localStream;
-let peerConnection;
-let audioEnabled = false;
+  const socket = io(); // already connected in script.js, reuse it if needed
 
-const config = {
-    iceServers: [
-        { urls: "stun:stun.l.google.com:19302" }
-    ]
-};
+  // JOINED call
+  socket.on("call-user", async () => {
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    peerConnection = new RTCPeerConnection(config);
 
-const constraints = { audio: true, video: false };
+    localStream.getTracks().forEach(track => {
+      peerConnection.addTrack(track, localStream);
+    });
 
-// Event: User clicks mic button
-toggleAudioBtn.addEventListener("click", async () => {
-    if (!audioEnabled) {
-        await startAudio();
-    } else {
-        stopAudio();
-    }
-});
+    peerConnection.onicecandidate = e => {
+      if (e.candidate) {
+        socket.emit("ice-candidate", e.candidate);
+      }
+    };
 
-async function startAudio() {
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    socket.emit("offer", offer);
+    console.log("Audio offer sent");
+  });
+
+  socket.on("offer", async (offer) => {
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    peerConnection = new RTCPeerConnection(config);
+
+    localStream.getTracks().forEach(track => {
+      peerConnection.addTrack(track, localStream);
+    });
+
+    peerConnection.ontrack = (event) => {
+      const remoteAudio = new Audio();
+      remoteAudio.srcObject = event.streams[0];
+      remoteAudio.play();
+    };
+
+    peerConnection.onicecandidate = (e) => {
+      if (e.candidate) {
+        socket.emit("ice-candidate", e.candidate);
+      }
+    };
+
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+    socket.emit("answer", answer);
+    console.log("Audio answer sent");
+  });
+
+  socket.on("answer", async (answer) => {
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+    console.log("Answer set successfully");
+  });
+
+  socket.on("ice-candidate", async (candidate) => {
     try {
-        localStream = await navigator.mediaDevices.getUserMedia(constraints);
-        peerConnection = new RTCPeerConnection(config);
-
-        localStream.getTracks().forEach(track => {
-            peerConnection.addTrack(track, localStream);
-        });
-
-        peerConnection.ontrack = (event) => {
-            const remoteAudio = new Audio();
-            remoteAudio.srcObject = event.streams[0];
-            remoteAudio.autoplay = true;
-        };
-
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                socket.emit("ice-candidate", event.candidate);
-            }
-        };
-
-        const offer = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offer);
-        socket.emit("audio-offer", offer);
-
-        audioEnabled = true;
-        toggleAudioBtn.textContent = "🔇 Stop Audio";
-
+      await peerConnection.addIceCandidate(candidate);
     } catch (err) {
-        console.error("Error accessing mic:", err);
-        alert("Microphone access is required for audio chat.");
+      console.error("Error adding received ice candidate", err);
     }
-}
-
-function stopAudio() {
-    if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-    }
-
-    if (peerConnection) {
-        peerConnection.close();
-        peerConnection = null;
-    }
-
-    audioEnabled = false;
-    toggleAudioBtn.textContent = "🎙️ Start Audio";
-}
-
-// Handle receiving an audio offer
-socket.on("audio-offer", async (offer) => {
-    try {
-        localStream = await navigator.mediaDevices.getUserMedia(constraints);
-        peerConnection = new RTCPeerConnection(config);
-
-        localStream.getTracks().forEach(track => {
-            peerConnection.addTrack(track, localStream);
-        });
-
-        peerConnection.ontrack = (event) => {
-            const remoteAudio = new Audio();
-            remoteAudio.srcObject = event.streams[0];
-            remoteAudio.autoplay = true;
-        };
-
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                socket.emit("ice-candidate", event.candidate);
-            }
-        };
-
-        await peerConnection.setRemoteDescription(offer);
-        const answer = await peerConnection.createAnswer();
-        await peerConnection.setLocalDescription(answer);
-        socket.emit("audio-answer", answer);
-
-        audioEnabled = true;
-        toggleAudioBtn.textContent = "🔇 Stop Audio";
-    } catch (err) {
-        console.error("Error receiving audio offer:", err);
-    }
-});
-
-// Handle receiving audio answer
-socket.on("audio-answer", async (answer) => {
-    if (peerConnection) {
-        await peerConnection.setRemoteDescription(answer);
-    }
-});
-
-// Handle receiving ICE candidates
-socket.on("ice-candidate", async (candidate) => {
-    if (peerConnection) {
-        try {
-            await peerConnection.addIceCandidate(candidate);
-        } catch (e) {
-            console.error("Error adding ICE candidate:", e);
-        }
-    }
-});
+  });
+})();
