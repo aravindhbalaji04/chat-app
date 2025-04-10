@@ -1,11 +1,11 @@
 const socket = io("https://chat-app-eeiv.onrender.com");
 
 socket.on('connect', () => {
-  console.log('Connected to server with id:', socket.id);
+    console.log('Connected to server with id:', socket.id);
 });
 
 socket.on('connect_error', (err) => {
-  console.error('Connection error:', err);
+    console.error('Connection error:', err);
 });
 
 const status = document.getElementById("status");
@@ -72,7 +72,17 @@ function sendMessage() {
 
 function addMessage(msg) {
     const div = document.createElement("div");
-    div.textContent = msg;
+    if (msg.startsWith("You:")) {
+        div.className = "user-msg";
+        div.textContent = msg.replace("You:", "").trim();
+    } else if (msg.startsWith("Stranger:")) {
+        div.className = "stranger-msg";
+        div.textContent = msg.replace("Stranger:", "").trim();
+    } else {
+        div.style.textAlign = "center";
+        div.style.color = "#aaa";
+        div.textContent = msg;
+    }
     messages.appendChild(div);
     messages.scrollTop = messages.scrollHeight;
 }
