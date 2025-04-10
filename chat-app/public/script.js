@@ -63,32 +63,22 @@ socket.on("partner-left", () => {
 });
 
 socket.on("audio-offer", async (offer) => {
+    isOfferer = false;
+
     if (!peerConnection) {
-        peerConnection = new RTCPeerConnection(config);
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                socket.emit("ice-candidate", event.candidate);
-            }
-        };
-        peerConnection.ontrack = (event) => {
-            const audioEl = document.getElementById("remoteAudio") || document.createElement("audio");
-            audioEl.id = "remoteAudio";
-            audioEl.autoplay = true;
-            audioEl.srcObject = event.streams[0];
-            if (!document.getElementById("remoteAudio")) {
-                document.body.appendChild(audioEl);
-            }
-        };
+        await preparePeerConnection();
     }
 
-    localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-    await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-    const answer = await peerConnection.createAnswer();
-    await peerConnection.setLocalDescription(answer);
-    socket.emit("audio-answer", answer);
+    try {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        socket.emit("audio-answer", answer);
+    } catch (err) {
+        console.error("Error handling offer:", err);
+    }
 });
+
 
 socket.on("audio-answer", async (answer) => {
     if (peerConnection) {
