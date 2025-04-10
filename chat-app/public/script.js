@@ -79,10 +79,16 @@ socket.on("audio-offer", async (offer) => {
     }
 });
 
-
 socket.on("audio-answer", async (answer) => {
-    if (peerConnection) {
+    if (!peerConnection || peerConnection.signalingState !== "have-local-offer") {
+        console.warn("Received answer but not in correct state:", peerConnection?.signalingState);
+        return;
+    }
+
+    try {
         await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+    } catch (err) {
+        console.error("Error setting remote description:", err);
     }
 });
 
