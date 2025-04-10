@@ -18,6 +18,8 @@ const themeToggle = document.getElementById("theme-toggle");
 const typingIndicator = document.getElementById("typing-indicator");
 let localStream = null;
 let peerConnection = null;
+let isOfferer = false;
+
 const config = {
     iceServers: [
         { urls: "stun:stun.l.google.com:19302" } // Free STUN server
