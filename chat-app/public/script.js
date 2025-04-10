@@ -217,6 +217,29 @@ function hideTypingIndicator() {
     typingIndicator.style.display = "none";
 }
 
+async function preparePeerConnection() {
+    peerConnection = new RTCPeerConnection(config);
+
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+    peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+            socket.emit("ice-candidate", event.candidate);
+        }
+    };
+
+    peerConnection.ontrack = (event) => {
+        let audioEl = document.getElementById("remoteAudio");
+        if (!audioEl) {
+            audioEl = document.createElement("audio");
+            audioEl.id = "remoteAudio";
+            audioEl.autoplay = true;
+            document.body.appendChild(audioEl);
+        }
+        audioEl.srcObject = event.streams[0];
+    };
+}
+
 async function startAudio() {
     try {
         if (!localStream) {
