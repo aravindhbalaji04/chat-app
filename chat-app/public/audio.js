@@ -5,7 +5,7 @@
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
   };
 
-  const socket = io(); // already connected in script.js, reuse it if needed
+ const socket = io("https://your-backend-url.onrender.com"); // ✅ Replace with your actual backend URL
 
   // JOINED call
   socket.on("call-user", async () => {
