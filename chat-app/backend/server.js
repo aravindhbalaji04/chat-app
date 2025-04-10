@@ -86,10 +86,9 @@ function match(socket) {
     if (waitingUser && waitingUser !== socket) {
         socket.partner = waitingUser;
         waitingUser.partner = socket;
-
-        socket.emit("paired");
-        waitingUser.emit("paired");
-
+        // 🔥 Emit the partner's socket ID to help decide who initiates WebRTC
+        socket.emit("paired", { partnerId: waitingUser.id });
+        waitingUser.emit("paired", { partnerId: socket.id });
         waitingUser = null;
     } else {
         waitingUser = socket;
