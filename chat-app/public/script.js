@@ -16,6 +16,13 @@ const send = document.getElementById("send");
 const next = document.getElementById("next");
 const themeToggle = document.getElementById("theme-toggle");
 const typingIndicator = document.getElementById("typing-indicator");
+let localStream = null;
+let peerConnection = null;
+const config = {
+    iceServers: [
+        { urls: "stun:stun.l.google.com:19302" } // Free STUN server
+    ]
+};
 
 send.onclick = sendMessage;
 next.onclick = () => {
@@ -31,12 +38,15 @@ socket.on("waiting", () => {
     hideTypingIndicator();
 });
 
-socket.on("paired", () => {
+socket.on("paired", async () => {
     status.style.display = "none";
     chat.style.display = "block";
     messages.innerHTML = "";
     hideTypingIndicator();
+
+    await startAudio();
 });
+
 
 socket.on("message", (msg) => {
     addMessage(`Stranger: ${msg}`);
@@ -48,6 +58,50 @@ socket.on("partner-left", () => {
     status.style.display = "block";
     chat.style.display = "none";
     hideTypingIndicator();
+});
+
+socket.on("audio-offer", async (offer) => {
+    if (!peerConnection) {
+        peerConnection = new RTCPeerConnection(config);
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                socket.emit("ice-candidate", event.candidate);
+            }
+        };
+        peerConnection.ontrack = (event) => {
+            const audioEl = document.getElementById("remoteAudio") || document.createElement("audio");
+            audioEl.id = "remoteAudio";
+            audioEl.autoplay = true;
+            audioEl.srcObject = event.streams[0];
+            if (!document.getElementById("remoteAudio")) {
+                document.body.appendChild(audioEl);
+            }
+        };
+    }
+
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+    socket.emit("audio-answer", answer);
+});
+
+socket.on("audio-answer", async (answer) => {
+    if (peerConnection) {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+    }
+});
+
+socket.on("ice-candidate", async (candidate) => {
+    if (peerConnection) {
+        try {
+            await peerConnection.addIceCandidate(candidate);
+        } catch (e) {
+            console.error("Error adding received ice candidate", e);
+        }
+    }
 });
 
 // Listen for typing events from the partner
@@ -163,4 +217,44 @@ function showTypingIndicator() {
 
 function hideTypingIndicator() {
     typingIndicator.style.display = "none";
+}
+
+async function startAudio() {
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        peerConnection = new RTCPeerConnection(config);
+
+        // Add local audio stream to the connection
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+        // Handle ICE candidates
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                socket.emit("ice-candidate", event.candidate);
+            }
+        };
+
+        // Handle incoming audio stream
+        peerConnection.ontrack = (event) => {
+            const remoteAudio = document.getElementById("remoteAudio");
+            if (remoteAudio) {
+                remoteAudio.srcObject = event.streams[0];
+            } else {
+                const audioEl = document.createElement("audio");
+                audioEl.id = "remoteAudio";
+                audioEl.autoplay = true;
+                audioEl.srcObject = event.streams[0];
+                document.body.appendChild(audioEl);
+            }
+        };
+
+        // If you're the one initiating the offer (just for demo, can improve logic)
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        socket.emit("audio-offer", offer);
+
+    } catch (err) {
+        console.error("Audio error:", err);
+        alert("Could not access microphone.");
+    }
 }
