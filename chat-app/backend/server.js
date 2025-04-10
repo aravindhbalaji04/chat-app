@@ -61,6 +61,25 @@ io.on("connection", (socket) => {
         console.log(`User ${socket.id} reacted with ${emoji}`);
     });
 
+    // AUDIO SIGNALING EVENTS
+    socket.on("audio-offer", (data) => {
+        if (socket.partner) {
+            socket.partner.emit("audio-offer", data);
+        }
+    });
+    
+    socket.on("audio-answer", (data) => {
+        if (socket.partner) {
+            socket.partner.emit("audio-answer", data);
+        }
+    });
+    
+    socket.on("ice-candidate", (candidate) => {
+        if (socket.partner) {
+            socket.partner.emit("ice-candidate", candidate);
+        }
+    });
+
 });
 
 function match(socket) {
