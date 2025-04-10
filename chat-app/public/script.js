@@ -40,15 +40,17 @@ socket.on("waiting", () => {
     hideTypingIndicator();
 });
 
-socket.on("paired", async () => {
+socket.on("paired", async ({ partnerId }) => {
     status.style.display = "none";
     chat.style.display = "block";
     messages.innerHTML = "";
     hideTypingIndicator();
 
-    // Let only one peer (the one with the lower socket ID) initiate audio
-    if (socket.id < yourPartnerSocketId) {
-        await startAudio();  // only the one with lower id sends offer
+    console.log("Paired with partner ID:", partnerId);
+
+    // Only one of the pair initiates the offer to prevent conflict
+    if (socket.id < partnerId) {
+        await startAudio();  // only the lower ID user sends the offer
     }
 });
 
